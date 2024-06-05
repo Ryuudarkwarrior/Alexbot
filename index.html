@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alexbot</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #1e1e1e;
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        #chat-container {
+            background-color: #2c2c2c;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            width: 400px;
+            max-width: 100%;
+            display: flex;
+            flex-direction: column;
+            height: 80vh;
+        }
+        #chatbox {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            border-bottom: 1px solid #444;
+        }
+        #userInputContainer {
+            display: flex;
+            padding: 10px;
+            border-top: 1px solid #444;
+        }
+        #userInput {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #444;
+            border-radius: 4px;
+            background-color: #3a3a3a;
+            color: #ffffff;
+            outline: none;
+        }
+        #sendButton {
+            background-color: #6f42c1;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 10px 20px;
+            margin-left: 10px;
+            cursor: pointer;
+        }
+        #sendButton:hover {
+            background-color: #563d7c;
+        }
+        .message {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 8px;
+            max-width: 70%;
+        }
+        .user {
+            background-color: #6f42c1;
+            color: white;
+            align-self: flex-end;
+        }
+        .bot {
+            background-color: #444;
+            color: #ffffff;
+            align-self: flex-start;
+        }
+    </style>
+</head>
+<body>
+    <div id="chat-container">
+        <div id="chatbox"></div>
+        <div id="userInputContainer">
+            <input type="text" id="userInput" placeholder="Tocar los huevos a Alex...">
+            <button id="sendButton" onclick="sendMessage()">Enviar</button>
+        </div>
+    </div>
+
+    <script>
+        function getResponse(userInput) {
+            let splitMessage = userInput.toLowerCase().split(/\s|[,:;.?!-_]\s*/);
+            let response = checkAllMessages(splitMessage);
+            return response;
+        }
+
+        function messageProbability(userMessage, recognizedWords, singleResponse = false, requiredWords = []) {
+            let messageCertainty = 0;
+            let hasRequiredWords = true;
+
+            for (let word of userMessage) {
+                if (recognizedWords.includes(word)) {
+                    messageCertainty += 1;
+                }
+            }
+
+            let percentage = messageCertainty / recognizedWords.length;
+
+            for (let word of requiredWords) {
+                if (!userMessage.includes(word)) {
+                    hasRequiredWords = false;
+                    break;
+                }
+            }
+
+            if (hasRequiredWords || singleResponse) {
+                return parseInt(percentage * 100);
+            } else {
+                return 0;
+            }
+        }
+
+        function checkAllMessages(message) {
+            let highestProb = {};
+
+            function response(botResponse, listOfWords, singleResponse = false, requiredWords = []) {
+                highestProb[botResponse] = messageProbability(message, listOfWords, singleResponse, requiredWords);
+            }
+
+            response('Que quieres ahora pesado', ['hola'], true);
+            response('La de infojobs te la sabes?', ['mira', 'que', 'meme'], false, ['meme']);
+            response('Macho es que deberias hacerte informatico tronco', ['Mira', 'lo', 'que', 'he', 'hecho', 'He', 'vuelto', 'a', 'programar', 'Volví', 'a', 'python'], true);
+            response('Eres un puto notas macho', ['que', 'opinas', 'de', 'mi'], true);
+            response('La culpa es del capitalismo', ['Que', 'opinas', 'de', 'la', 'situación', 'geopolitica', 'actual'], false, ['geopolitica']);
+
+            let bestMatch = Object.keys(highestProb).reduce((a, b) => highestProb[a] > highestProb[b] ? a : b);
+
+            return highestProb[bestMatch] < 1 ? unknown() : bestMatch;
+        }
+
+        function unknown() {
+            let responses = ['Eres un puto personaje macho', '....', 'Delante de mi ensalada, ¿en serio?', 'Gendo did nothing wrong', 'Malditos Alemanes', 'Pipo'];
+            return responses[Math.floor(Math.random() * responses.length)];
+        }
+
+        function sendMessage() {
+            let userInput = document.getElementById('userInput').value;
+            if (userInput.trim() === '') return;
+
+            let chatbox = document.getElementById('chatbox');
+            let userMessageDiv = document.createElement('div');
+            userMessageDiv.className = 'message user';
+            userMessageDiv.textContent = 'You: ' + userInput;
+            chatbox.appendChild(userMessageDiv);
+
+            let botResponse = getResponse(userInput);
+            let botMessageDiv = document.createElement('div');
+            botMessageDiv.className = 'message bot';
+            botMessageDiv.textContent = 'Alexbot: ' + botResponse;
+            chatbox.appendChild(botMessageDiv);
+
+            document.getElementById('userInput').value = '';
+            chatbox.scrollTop = chatbox.scrollHeight;
+        }
+
+        document.getElementById('userInput').addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        });
+    </script>
+</body>
+</html>
