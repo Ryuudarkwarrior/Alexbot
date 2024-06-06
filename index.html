@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Alexbot</title>
     <style>
-        body {
+         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #1e1e1e;
             color: #ffffff;
@@ -19,11 +19,26 @@
             background-color: #2c2c2c;
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-            width: 400px;
+            width: 600px;
             max-width: 100%;
             display: flex;
             flex-direction: column;
             height: 80vh;
+            position: relative;
+        }
+        #chat-header {
+            background-color: #6f42c1;
+            padding: 10px;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        #typingStatus {
+            font-size: 12px;
+            color: #ffffff;
+            opacity: 0.5;
         }
         #chatbox {
             flex: 1;
@@ -57,26 +72,39 @@
         #sendButton:hover {
             background-color: #563d7c;
         }
+        .message-container {
+            display: flex;
+            margin-bottom: 10px;
+        }
         .message {
-            margin: 10px 0;
             padding: 10px;
-            border-radius: 8px;
+            border-radius: 20px;
             max-width: 70%;
+            word-wrap: break-word;
+            margin-bottom: 10px; /* Added margin for spacing */
         }
         .user {
-            background-color: #6f42c1;
+            background-color: #007bff;
             color: white;
             align-self: flex-end;
+            border-top-right-radius: 0;
+            margin-left: auto;
         }
         .bot {
-            background-color: #444;
+            background-color: #6f42c1;
             color: #ffffff;
             align-self: flex-start;
+            border-top-left-radius: 0;
+            margin-right: auto;
         }
     </style>
 </head>
 <body>
     <div id="chat-container">
+        <div id="chat-header">
+            <div>Alexbot</div>
+            <div id="typingStatus">en línea</div>
+        </div>
         <div id="chatbox"></div>
         <div id="userInputContainer">
             <input type="text" id="userInput" placeholder="Tocar los huevos a Alex...">
@@ -90,6 +118,7 @@
             let response = checkAllMessages(splitMessage);
             return response;
         }
+
 
         function messageProbability(userMessage, recognizedWords, singleResponse = false, requiredWords = []) {
             let messageCertainty = 0;
@@ -126,19 +155,21 @@
 
             response('Que quieres ahora pesado', ['hola'], true);
             response('La de infojobs te la sabes?', ['mira', 'que', 'meme'], false, ['meme']);
-            response('Macho es que deberias hacerte informatico tronco', ['Mira', 'lo', 'que', 'he', 'hecho', 'He', 'vuelto', 'a', 'programar', 'Volví', 'a', 'python'], true);
+            response('Macho es que deberias hacerte informatico tronco', ['mira', 'lo', 'que', 'he', 'hecho', 'he', 'vuelto', 'a', 'programar', 'volví', 'a', 'python'], true);
             response('Eres un puto notas macho', ['que', 'opinas', 'de', 'mi'], true);
-            response('La culpa es del capitalismo', ['Que', 'opinas', 'de', 'la', 'situación', 'geopolitica', 'actual'], false, ['geopolitica']);
+            response('La culpa es del capitalismo', ['que', 'opinas', 'de', 'la', 'situación', 'geopolitica', 'actual'], false, ['geopolitica']);
 
             let bestMatch = Object.keys(highestProb).reduce((a, b) => highestProb[a] > highestProb[b] ? a : b);
 
             return highestProb[bestMatch] < 1 ? unknown() : bestMatch;
         }
 
+ 
         function unknown() {
             let responses = ['Eres un puto personaje macho', '....', 'Delante de mi ensalada, ¿en serio?', 'Gendo did nothing wrong', 'Malditos Alemanes', 'Pipo'];
             return responses[Math.floor(Math.random() * responses.length)];
         }
+
 
         function sendMessage() {
             let userInput = document.getElementById('userInput').value;
@@ -160,11 +191,14 @@
             chatbox.scrollTop = chatbox.scrollHeight;
         }
 
+
         document.getElementById('userInput').addEventListener('keydown', function(event) {
             if (event.key === 'Enter') {
                 sendMessage();
             }
         });
+    </script>
+
     </script>
 </body>
 </html>
